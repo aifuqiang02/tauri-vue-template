@@ -52,6 +52,12 @@ async function updateVersion() {
     oldVer => `version = "${oldVer}"`,
     newVer => `version = "${newVer}"`
   )
+
+  await updateFile(
+    'src-tauri/Cargo.lock',
+    oldVer => `name = "tauri-app"\nversion = "${oldVer}"`,
+    newVer => `name = "tauri-app"\nversion = "${newVer}"`
+  )
 }
 
 updateVersion().catch(console.error)
