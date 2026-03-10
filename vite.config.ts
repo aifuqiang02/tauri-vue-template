@@ -6,7 +6,7 @@ import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import topLevelAwait from 'vite-plugin-top-level-await'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import vueInspectorAi from 'vite-plugin-vue-inspector-ai'
 import { version as pkgVersion } from './package.json'
 
 const HOST = process.env.TAURI_DEV_HOST
@@ -23,7 +23,7 @@ export default defineConfig({
     topLevelAwait(),
     nodePolyfills(),
     vue(),
-    vueDevTools(),
+    vueInspectorAi(),
     AutoImport({
       imports: [
         'vue',

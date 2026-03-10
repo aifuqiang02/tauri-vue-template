@@ -1,95 +1,58 @@
-# Tauri + Vue + Vite Template
+# Tauri + Vue 桌面应用模板
 
-![Screenshot](./public/v2_screenshot.webp)
+## 特性
 
-A production-ready template to build fast, secure desktop apps with Tauri and Vue.
+- Vue 3 + TypeScript
+- Tailwind 4
+- Vite + AutoImport
+- Vitest 单元测试
+- GitHub Actions CI/CD
 
-## Features
+## 快速开始
 
-- **Vue 3 + TypeScript** - Type-safe frontend with devtools
-- **Tailwind 4** - CSS preconfigured for native app development
-- **Vite** - Fast builds with [AutoImport](https://github.com/antfu/unplugin-auto-import) for cleaner code
-- **Vitest** - Unit testing ready to go
-- **CI/CD included** - GitHub Actions for automated testing, builds, and releases
-- **VS Code ready** - Debugging configs and recommended extensions
-
-## Quick Start
-
-1. Install [Tauri prerequisites](https://tauri.app/start/prerequisites/)
-2. Clone and install dependencies:
+1. 安装依赖：
 
 ```sh
-pnpm i
+pnpm install
 ```
 
-1. Run the development server (starts both the backend and frontend dev servers and opens the devtools):
+2. 启动开发：
 
 ```sh
 pnpm tauri dev
 ```
 
-## Project Structure and Usage
+## 命令
 
-A Tauri app has [two processes](https://tauri.app/concept/process-model/):
+- `pnpm tauri dev` - 启动开发
+- `pnpm tauri build` - 构建生产版本
+- `pnpm test` - 运行测试
 
-- **Core Process** (`backend`, or _main_ process in Electron terminology)
-- **WebView process** (`frontend`, _renderer_ in Electron)
+## 应用内更新
 
-### Frontend (TS, PnPM)
+模板已接入 Tauri v2 updater，设置页里可以直接检查更新并安装。
 
-Frontend code lives in `src/`. See `package.json` for all available commands.
+本地开发或普通构建不会默认生成 updater 产物；只有 GitHub Release 工作流会额外加载 `src-tauri/tauri.updater.conf.json` 来生成 `latest.json` 和签名文件。
 
-**Testing:**
+发布前需要准备这些 GitHub 配置：
 
-```sh
-pnpm test
-```
+- `secrets.TAURI_SIGNING_PRIVATE_KEY`
+- `secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD`
+- `vars.TAURI_UPDATER_PUBLIC_KEY`
 
-### Backend (Rust, Cargo)
-
-Backend code lives in `src-tauri/`.
-
-**Finding outdated dependencies** (requires [cargo-outdated](https://github.com/kbknapp/cargo-outdated)):
+可以先用 Tauri CLI 生成签名密钥：
 
 ```sh
-cd src-tauri && cargo outdated
+pnpm tauri signer generate
 ```
 
-**Upgrading dependencies** (requires [cargo-edit](https://github.com/killercup/cargo-edit)):
+发布工作流会自动把更新地址设置成当前仓库的 GitHub Releases 最新下载地址：
 
-```sh
-cd src-tauri && cargo upgrade
+```text
+https://github.com/<owner>/<repo>/releases/latest/download/latest.json
 ```
 
-### Debugging
+## 项目结构
 
-- The `dev` command has by default `RUST_BACKTRACE=1` set which makes Rust output full backtraces to the console. (Remove it from the `package.json` command if you don't want it).
-- If you use VS Code, you can debug Rust code with the included `Debug Tauri` config.
-
-### Building and releasing
-
-#### Building
-
-The project has GitHub Actions set up which will automatically test and build your app with every push and PR. To build manually run:
-
-```sh
-pnpm tauri build
-```
-
-#### Releasing a new version
-
-1. Bump version number by running `pnpm bump [x.y.z]`
-2. Run `pnpm check` to update `Cargo.lock`
-3. Tag the commit you want to release with `vX.Y.Z`
-4. Edit the release notes and push (also tags!)
-5. Github workflow will automatically build a new draft release for this version. Publish when ready 🎉
-
-## Follow Along
-
-- Follow [@uninen on X](https://x.com/uninen) or [uninen.net on Bluesky](https://bsky.app/profile/uninen.net)
-- Read my learnings around Tauri / Vue / TypeScript and other Web dev topics from my [Today I Learned blog](https://til.unessa.net/)
-- If you speak Finnish, check out [Koneoppiblogi](https://koneoppiblogi.uninen.net)
-
-## Contributing
-
-Contributions are welcome! Please [be nice](./CODE_OF_CONDUCT.md) when interacting with others.
+- `src/` - 前端代码 (Vue)
+- `src-tauri/` - 后端代码 (Rust)

@@ -11,6 +11,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BrowserPane: typeof import('./src/components/BrowserPane.vue')['default']
+    DashboardView: typeof import('./src/components/DashboardView.vue')['default']
     GreetComponent: typeof import('./src/components/GreetComponent.vue')['default']
+    LoginView: typeof import('./src/components/LoginView.vue')['default']
+    SettingsPanel: typeof import('./src/components/SettingsPanel.vue')['default']
   }
 }
