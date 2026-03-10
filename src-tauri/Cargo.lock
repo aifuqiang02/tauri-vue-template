@@ -3461,7 +3461,7 @@ dependencies = [
 
 [[package]]
 name = "tauri-app"
-version = "2.9.5"
+version = "2.9.6"
 dependencies = [
  "serde",
  "serde_json",
