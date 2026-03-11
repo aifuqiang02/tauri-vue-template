@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DashboardView from '@/components/DashboardView.vue'
 import LoginView from '@/components/LoginView.vue'
-import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 
 const store = useStore()
 store.initApp()
@@ -21,7 +21,21 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
+  store.stopAutoUpdateChecks()
 })
+
+watch(
+  () => store.isAuthenticated,
+  (isAuthenticated) => {
+    if (isAuthenticated) {
+      store.startAutoUpdateChecks()
+      return
+    }
+
+    store.stopAutoUpdateChecks()
+  },
+  { immediate: true },
+)
 </script>
 
 <template>

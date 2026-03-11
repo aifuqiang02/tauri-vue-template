@@ -61,6 +61,7 @@ interface UpdaterState {
   available: UpdatePayload | null
   lastCheckedAt: string | null
   lastError: string | null
+  promptVisible: boolean
 }
 
 interface LogStatusPayload {
@@ -76,6 +77,9 @@ interface LogState {
 
 const versionString =
   import.meta.env.MODE === 'development' ? `${import.meta.env.VITE_APP_VERSION}-dev` : import.meta.env.VITE_APP_VERSION
+const AUTO_UPDATE_INTERVAL_MS = 2 * 60 * 60 * 1000
+
+let autoUpdateTimer: ReturnType<typeof setInterval> | null = null
 
 const basePanels: BrowserPanel[] = [
   {
@@ -150,6 +154,7 @@ export const useStore = defineStore('main', {
       available: null,
       lastCheckedAt: null,
       lastError: null,
+      promptVisible: false,
     } as UpdaterState,
     logs: {
       directory: null,
@@ -272,9 +277,13 @@ export const useStore = defineStore('main', {
         this.logs.lastError = String(error)
       }
     },
-    async checkForUpdates() {
+    async checkForUpdates(options?: { background?: boolean }) {
       if (!isTauri()) {
         this.updater.lastError = '当前不在 Tauri 桌面环境中，无法检查更新。'
+        return
+      }
+
+      if (this.updater.checking || this.updater.installing) {
         return
       }
 
@@ -285,6 +294,14 @@ export const useStore = defineStore('main', {
         const update = await invoke<UpdatePayload | null>('check_for_update')
         this.updater.available = update
         this.updater.lastCheckedAt = new Date().toISOString()
+        this.updater.promptVisible = Boolean(update)
+
+        if (update && options?.background) {
+          const message = `发现新版本 v${update.version}，可在设置中安装更新。`
+          if (!this.notifications.includes(message)) {
+            this.notifications.unshift(message)
+          }
+        }
       } catch (error) {
         this.updater.available = null
         this.updater.lastError = String(error)
@@ -311,6 +328,29 @@ export const useStore = defineStore('main', {
         this.updater.lastError = String(error)
         this.updater.installing = false
       }
+    },
+    dismissUpdatePrompt() {
+      this.updater.promptVisible = false
+    },
+    startAutoUpdateChecks() {
+      if (!isTauri()) {
+        return
+      }
+
+      this.stopAutoUpdateChecks()
+      void this.checkForUpdates({ background: true })
+
+      autoUpdateTimer = setInterval(() => {
+        void this.checkForUpdates({ background: true })
+      }, AUTO_UPDATE_INTERVAL_MS)
+    },
+    stopAutoUpdateChecks() {
+      if (!autoUpdateTimer) {
+        return
+      }
+
+      clearInterval(autoUpdateTimer)
+      autoUpdateTimer = null
     },
     async openLogsDirectory() {
       if (!isTauri()) {

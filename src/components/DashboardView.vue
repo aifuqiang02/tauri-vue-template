@@ -119,6 +119,26 @@ const handleHeaderMouseDown = (event: MouseEvent) => {
         </div>
       </header>
 
+      <section
+        v-if="store.updater.available && store.updater.promptVisible"
+        class="mx-6 mt-4 rounded-3xl border border-emerald-500/20 bg-emerald-500/8 px-5 py-4 text-sm text-[var(--text-strong)]"
+      >
+        <div class="flex items-start justify-between gap-4">
+          <div class="space-y-1">
+            <p class="font-semibold text-emerald-600">发现新版本 v{{ store.updater.available.version }}</p>
+            <p class="text-[var(--text-soft)]">已在后台完成更新检查，你可以现在打开设置安装更新，也可以稍后再处理。</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="nav-link nav-link--design" type="button" @click="store.openSettingsModal()">
+              去安装
+            </button>
+            <button class="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-strong)]" type="button" @click="store.dismissUpdatePrompt()">
+              稍后
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section class="browser-grid">
         <BrowserPane v-for="pane in store.panels.slice(0, 3)" :key="pane.id" :pane="pane" />
 
