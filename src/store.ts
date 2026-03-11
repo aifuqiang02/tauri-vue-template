@@ -63,6 +63,17 @@ interface UpdaterState {
   lastError: string | null
 }
 
+interface LogStatusPayload {
+  directory: string
+  filePath: string
+}
+
+interface LogState {
+  directory: string | null
+  filePath: string | null
+  lastError: string | null
+}
+
 const versionString =
   import.meta.env.MODE === 'development' ? `${import.meta.env.VITE_APP_VERSION}-dev` : import.meta.env.VITE_APP_VERSION
 
@@ -140,6 +151,11 @@ export const useStore = defineStore('main', {
       lastCheckedAt: null,
       lastError: null,
     } as UpdaterState,
+    logs: {
+      directory: null,
+      filePath: null,
+      lastError: null,
+    } as LogState,
     notifications: [
       '模拟登录已启用，可直接使用默认账号进入。',
       '所有统计和浏览器内容均为本地假数据，用于 UI 演示。',
@@ -172,6 +188,7 @@ export const useStore = defineStore('main', {
       }
       this.isInitialized = true
       void this.loadUpdaterStatus()
+      void this.loadLogStatus()
     },
     async login() {
       this.isLoginSubmitting = true
@@ -236,6 +253,25 @@ export const useStore = defineStore('main', {
         this.updater.endpoints = []
       }
     },
+    async loadLogStatus() {
+      if (!isTauri()) {
+        this.logs.directory = null
+        this.logs.filePath = null
+        this.logs.lastError = '仅 Tauri 桌面应用支持本地日志。'
+        return
+      }
+
+      try {
+        const status = await invoke<LogStatusPayload>('logger_status')
+        this.logs.directory = status.directory
+        this.logs.filePath = status.filePath
+        this.logs.lastError = null
+      } catch (error) {
+        this.logs.directory = null
+        this.logs.filePath = null
+        this.logs.lastError = String(error)
+      }
+    },
     async checkForUpdates() {
       if (!isTauri()) {
         this.updater.lastError = '当前不在 Tauri 桌面环境中，无法检查更新。'
@@ -274,6 +310,30 @@ export const useStore = defineStore('main', {
       } catch (error) {
         this.updater.lastError = String(error)
         this.updater.installing = false
+      }
+    },
+    async openLogsDirectory() {
+      if (!isTauri()) {
+        this.logs.lastError = '当前不在 Tauri 桌面环境中，无法打开日志目录。'
+        return
+      }
+
+      try {
+        await invoke('open_logs_directory')
+        this.logs.lastError = null
+      } catch (error) {
+        this.logs.lastError = String(error)
+      }
+    },
+    async openDevtools() {
+      if (!isTauri()) {
+        return
+      }
+
+      try {
+        await invoke('open_devtools')
+      } catch (error) {
+        this.logs.lastError = String(error)
       }
     },
   },

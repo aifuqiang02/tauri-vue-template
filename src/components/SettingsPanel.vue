@@ -42,6 +42,14 @@ const assignSectionRef = (id: SectionId) => (element: Element | null) => {
 }
 
 const updaterDescription = computed(() => {
+  if (store.updater.installing) {
+    return '正在下载并安装更新，请稍候。安装完成后应用会自动重启。'
+  }
+
+  if (store.updater.checking) {
+    return '正在检查 GitHub Release 中的新版本，请稍候。'
+  }
+
   if (store.updater.available) {
     return `发现新版本 v${store.updater.available.version}，下载安装后应用会自动重启。`
   }
@@ -234,6 +242,21 @@ onMounted(() => {
                 <p class="settings-inline-desc">设置新建窗格时默认打开的网址。</p>
               </div>
               <input v-model="store.settings.homeUrl" class="text-input settings-text-input" type="text" />
+            </div>
+            <div class="settings-card settings-card--form">
+              <div class="flex items-start justify-between gap-4">
+                <div class="space-y-2">
+                  <h3 class="settings-subhead">日志文件</h3>
+                  <p class="settings-inline-desc">应用会将启动、检查更新和安装更新等信息写入本地日志，便于排查问题。</p>
+                  <p class="text-sm leading-6 text-[var(--text-soft)]">
+                    {{ store.logs.filePath ?? store.logs.lastError ?? '正在读取日志目录...' }}
+                  </p>
+                </div>
+
+                <button class="settings-save-button shrink-0" type="button" @click="store.openLogsDirectory()">
+                  打开日志目录
+                </button>
+              </div>
             </div>
           </div>
         </section>

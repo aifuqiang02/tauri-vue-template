@@ -1,9 +1,27 @@
 <script setup lang="ts">
 import DashboardView from '@/components/DashboardView.vue'
 import LoginView from '@/components/LoginView.vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 
 const store = useStore()
 store.initApp()
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key !== 'F12') {
+    return
+  }
+
+  event.preventDefault()
+  void store.openDevtools()
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <template>
